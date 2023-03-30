@@ -119,7 +119,7 @@ public class Scanner {
                     while(numeros.containsKey(character)){                       
                         charac = source.charAt(i);         
                         character = String.valueOf(charac);
-                        if(numeros.containsKey(character)){
+                        if(numeros.containsKey(character)||character=="."){
                             num = num+character;
                         }
                         i++;
