@@ -77,7 +77,6 @@ public class Scanner {
         
     }
     
-    ////////////////////////////   PALABRA RESERVADAS    ////////////////////////////////
     Scanner(String source){
         this.source = source;
     }
@@ -90,7 +89,8 @@ public class Scanner {
         String palabra="";
         String sigchar="";
         String num="";
-        boolean idnum=false;
+        boolean finalizado=false;
+        int caso=0;
 
         ////////////////////////////   CICLO PARA RECORRER LA CADENA   ////////////////////////////////
         for(int i=0;i<source.length();i++){           
@@ -100,39 +100,44 @@ public class Scanner {
                 sigchar = character + source.charAt(i+1);
             }
             
-            ////////////////////////////   SE ENCONTRO UN SIMBOLO, NUMERO O ESPACIO   ////////////////////////////////
-            if(signos.containsKey(character) || numeros.containsKey(character) || charac=='"' || i==source.length()-1){
-
-                if(numeros.containsKey(character)){
-                    idnum=false;
-                }else{
-                    idnum=true;
-                }
-                if(palabra!=""&& !idnum){
-                    palabra=palabra+character;
-                }
-                ////////////////////////////   SI COMIENZA CON UN NÚMERO    ////////////////////////////////
-                if(numeros.containsKey(character) && palabra==""){
-                    num=character;
-                    i++;
-                    ////////////////////////////   RECUPERAR TODO EL NUMERO    ////////////////////////////////
-                    while(numeros.containsKey(character)){                       
-                        charac = source.charAt(i);         
-                        character = String.valueOf(charac);
-                        if(numeros.containsKey(character)||character=="."){
-                            num = num+character;
-                        }
-                        i++;
-                    }
-                    i--;
-                    ////////////////////////////   CREAR TOKEN DEL NUMERO    ////////////////////////////////
-                    tokens.add(new Token(TipoToken.NUMERO, num, Integer.parseInt(num), linea));
-                    if(!signos.containsKey(character)){
-                        palabra=palabra+character;
-                    }
-                }
-                ////////////////////////////   SI NO COMIENZA CON NUMERO   ////////////////////////////////
+            if(sigchar.equals("/*"))
+                caso=3;
+            else{
+                if(sigchar.equals("//"))
+                    caso=4;
                 else{
+                    if(signos.containsKey(character)||i==source.length()-1){
+                        caso=2;
+                    }else{
+                        if(charac=='"'){
+                            caso=5;
+                        }else{
+                            if(numeros.containsKey(character) && palabra==""){
+                                caso=1;
+                            }else
+                                caso=0;
+                        }
+                    }
+                }     
+            }  
+            switch(caso){
+                case 0:
+                    palabra+=character;
+                    break;
+                case 1:
+                    ////////////////////////////   RECUPERAR TODO EL NUMERO    ////////////////////////////////
+                    while(numeros.containsKey(character)||charac=='.'){                                               
+                        num = num+character;
+                        i++;
+                        charac = source.charAt(i);
+                        character = String.valueOf(charac);
+                    }
+                    i--;                    
+                    ////////////////////////////   CREAR TOKEN DEL NUMERO    ////////////////////////////////
+                    tokens.add(new Token(TipoToken.NUMERO, num, Double.parseDouble(num), linea));
+                    num="";
+                    break;
+                case 2:
                     ////////////////////////////   SI ES UNA PALABRA CLAVE   ////////////////////////////////
                     if(palabrasReservadas.containsKey(palabra)){
                         ////////////////////////////   CREAR TOKEN DE PALABRA CLAVE   ////////////////////////////////
@@ -141,74 +146,86 @@ public class Scanner {
                     }
                     ////////////////////////////   SI NO ES PALABRA CLAVE   ////////////////////////////////
                     else{
-                        if(palabra!="" && idnum){
-                            ////////////////////////////   CREAR TOKEN DE IDENTIFICADOR   ////////////////////////////////
+                        ////////////////////////////   CREAR TOKEN DE IDENTIFICADOR   ////////////////////////////////
+                        if(!palabra.equals("")){
                             tokens.add(new Token(TipoToken.IDENTIFICADOR, palabra, null, linea));
                             palabra="";
                         }
-                    }
-                }
-                ////////////////////////////   SI ES UN SIGNO   ////////////////////////////////             
-                if(charac!=' ' && signos.containsKey(character)||charac=='"'){
+                    }                    
                     ////////////////////////////   SI ES UN SIGNO COMPUESTO   ////////////////////////////////
                     if(signos.containsKey(sigchar)){
                         ////////////////////////////   CREAR TOKEN DEL SIGNO   ////////////////////////////////
                         tokens.add(new Token(signos.get(sigchar), sigchar, null, linea));
                         i++;
+                    }else{
+                        ////////////////////////////   NO FUE SIGNO COMPUESTO   ////////////////////////////////
+                        if(charac!=' '&&!character.equals(""))
+                        tokens.add(new Token(signos.get(character), character, null, linea));
                     }
-                    else{
-                        ////////////////////////////   SI ES UN COMENTARIO   ////////////////////////////////
-                        if(sigchar.equals("//")|| sigchar.equals("/*")){
-                            for(int a=i;a<source.length();a++){
-                                charac = source.charAt(a);
-                                character = String.valueOf(charac);
-                                if(a<source.length()-1){
-                                    sigchar = character + source.charAt(a+1);
-                                }
-                                
-                                i=a;
-                                if(sigchar.equals("*/")){
-                                    i=a+1;
-                                    a=source.length();
-                                }                     
-                            }
+                    break;
+                case 3:
+                    for(int a=i;a<source.length();a++){
+                        charac = source.charAt(a);
+                        character = String.valueOf(charac);
+                        if(a<source.length()-1){
+                            sigchar = character + source.charAt(a+1);
                         }
-                        else{
-                            ////////////////////////////   SI ES UNA CADENA   ////////////////////////////////
-                            if(charac=='"'){
-                                palabra="";
-                                String cadena = "";
-                                cadena=cadena+'"';
-                                ////////////////////////////   RECUPERAR CADENA   ////////////////////////////////
-                                for(int a=i+1;a<source.length();a++){
-                                    
-                                    charac = source.charAt(a);
-                                    character = String.valueOf(charac);
-                                    if(charac=='"'){
-                                        ////////////////////////////   SI ES FINAL DE LA CADENA   ////////////////////////////////
-                                        i=a;
-                                        a=source.length();
-                                    }else{
-                                        palabra = palabra+character;
-                                    }                               
-                                }
-                                cadena=cadena+palabra+'"';
-                                ////////////////////////////   CREAR TOKEN DE CADENA   ////////////////////////////////
-                                tokens.add(new Token(TipoToken.CADENA, cadena, palabra, linea));
-                                palabra="";
-                            }else{
-                                ////////////////////////////   NO FUE SIGNO COMPUESTO, COMENTARIO NI CADENA, ES OTRO SIGNO   ////////////////////////////////
-                                tokens.add(new Token(signos.get(character), character, null, linea));
-                            }
-                        }                        
-                    }                   
-                }                
+                        i=a;
+                        if(sigchar.equals("*/")){
+                            i=a+1;
+                            finalizado=true;
+                            a=source.length();
+                        }                  
+                    }
+                    if(!finalizado){
+                        System.out.println("No se encontro fin de comentario");
+                        System.exit(1);
+                    }
+                    break;
+                case 4:
+                    for(int a=i;a<source.length();a++){
+                        charac = source.charAt(a);
+                        character = String.valueOf(charac);
+                        if(a<source.length()-1){
+                            sigchar = character + source.charAt(a+1);
+                        }
+                        if(sigchar.equals("\n")||a==source.length()-1){
+                            i=a+1;
+                            
+                            a=source.length();
+                        }               
+                    }
+                    
+                    break;
+                case 5:
+                    palabra="";
+                    String cadena = "";
+                    cadena=cadena+'"';
+                    ////////////////////////////   RECUPERAR CADENA   ////////////////////////////////
+                    for(int a=i+1;a<source.length();a++){
+                        charac = source.charAt(a);
+                        character = String.valueOf(charac);
+                        if(charac=='"'){
+                    ////////////////////////////   SI ES FINAL DE LA CADENA   ////////////////////////////////
+                            i=a;
+                            finalizado=true;
+                            a=source.length();
+                        }else{
+                            palabra = palabra+character;
+                        }
+                    }
+                    if(!finalizado){
+                        System.out.println("No se encontro el fin de cadena");
+                        System.exit(1);
+                    }
+                    cadena=cadena+palabra+'"';
+                    ///////////////////////////   CREAR TOKEN DE CADENA   ////////////////////////////////
+                    tokens.add(new Token(TipoToken.CADENA, cadena, palabra, linea));
+                    palabra="";
+                    break;
             }
-            ////////////////////////////   NO FUE SIGNO, NUMERO O ESPACIO   ////////////////////////////////          
-            else{
-                palabra = palabra+character;
-            }           
-        }       
+                     
+        }     
         tokens.add(new Token(TipoToken.EOF, "", null, linea));
         return tokens;
     }
