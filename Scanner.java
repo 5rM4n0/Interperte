@@ -13,6 +13,7 @@ public class Scanner {
 
     private int linea = 1;
     
+    
     ////////////////////////////   PALABRA RESERVADAS    ////////////////////////////////
     private static final Map<String, TipoToken> palabrasReservadas;
     static {
@@ -28,7 +29,7 @@ public class Scanner {
         palabrasReservadas.put("o", TipoToken.O);
         palabrasReservadas.put("imprimir", TipoToken.IMPRIMIR);
         palabrasReservadas.put("retornar", TipoToken.RETORNAR);
-        palabrasReservadas.put("super", TipoToken.SUPER);
+        palabrasReservadas.put("super", TipoToken.SUPERS);
         palabrasReservadas.put("este", TipoToken.ESTE);
         palabrasReservadas.put("verdadero", TipoToken.VERDADERO);
         palabrasReservadas.put("var", TipoToken.VAR); //definir variables
@@ -41,10 +42,10 @@ public class Scanner {
         signos = new HashMap<>();
         signos.put("+", TipoToken.MAS);
         signos.put(" ", TipoToken.SPACE);
-        signos.put("{", TipoToken.COR_DER);
-        signos.put("}", TipoToken.COR_IZ);
-        signos.put("(", TipoToken.PARE_DER);
-        signos.put(")", TipoToken.PARE_IZ);
+        signos.put("}", TipoToken.COR_DER);
+        signos.put("{", TipoToken.COR_IZ);
+        signos.put(")", TipoToken.PARE_DER);
+        signos.put("(", TipoToken.PARE_IZ);
         signos.put("*", TipoToken.POR);
         signos.put("/", TipoToken.ENTRE);
         signos.put("-", TipoToken.MENOS);
@@ -135,6 +136,7 @@ public class Scanner {
                     i--;                    
                     ////////////////////////////   CREAR TOKEN DEL NUMERO    ////////////////////////////////
                     tokens.add(new Token(TipoToken.NUMERO, num, Double.parseDouble(num), linea));
+                    linea++;
                     num="";
                     break;
                 case 2:
@@ -142,6 +144,7 @@ public class Scanner {
                     if(palabrasReservadas.containsKey(palabra)){
                         ////////////////////////////   CREAR TOKEN DE PALABRA CLAVE   ////////////////////////////////
                         tokens.add(new Token(palabrasReservadas.get(palabra), palabra, null, linea));
+                        linea++;
                         palabra="";
                     }
                     ////////////////////////////   SI NO ES PALABRA CLAVE   ////////////////////////////////
@@ -149,6 +152,7 @@ public class Scanner {
                         ////////////////////////////   CREAR TOKEN DE IDENTIFICADOR   ////////////////////////////////
                         if(!palabra.equals("")){
                             tokens.add(new Token(TipoToken.IDENTIFICADOR, palabra, null, linea));
+                            linea++;
                             palabra="";
                         }
                     }                    
@@ -156,11 +160,14 @@ public class Scanner {
                     if(signos.containsKey(sigchar)){
                         ////////////////////////////   CREAR TOKEN DEL SIGNO   ////////////////////////////////
                         tokens.add(new Token(signos.get(sigchar), sigchar, null, linea));
+                        linea++;
                         i++;
+                        sigchar = "";
                     }else{
                         ////////////////////////////   NO FUE SIGNO COMPUESTO   ////////////////////////////////
                         if(charac!=' '&&!character.equals(""))
                         tokens.add(new Token(signos.get(character), character, null, linea));
+                        linea++;
                     }
                     break;
                 case 3:
@@ -221,11 +228,23 @@ public class Scanner {
                     cadena=cadena+palabra+'"';
                     ///////////////////////////   CREAR TOKEN DE CADENA   ////////////////////////////////
                     tokens.add(new Token(TipoToken.CADENA, cadena, palabra, linea));
+                    linea++;
                     palabra="";
+                    sigchar = "";
                     break;
             }
-                     
-        }     
+        }
+        // Verificar si la lista tiene al menos 2 tokens
+            if (tokens.size() >= 2) {
+                // Obtener una vista de sublista que contiene los tokens a eliminar
+                List<Token> tokensToRemove = tokens.subList(tokens.size() - 1, tokens.size());
+
+                // Remover los tokens de la lista principal
+                tokens.removeAll(tokensToRemove);
+                linea--;
+            }
+
+        
         tokens.add(new Token(TipoToken.EOF, "", null, linea));
         return tokens;
     }

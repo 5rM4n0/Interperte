@@ -57,6 +57,8 @@ public class Interprete {
         for(Token token : tokens){
             System.out.println(token);
         }
+        Parser parser = new Parser(tokens);
+        parser.parse();
     }
 
     /*
