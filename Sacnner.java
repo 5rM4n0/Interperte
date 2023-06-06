@@ -174,11 +174,14 @@ List<Token> scanTokens(){
                     if (a < source.length() - 1) {
                         sigchar = character + source.charAt(a + 1);
                     }
+                    if (charac == '\n') {
+                    linea++; // Incrementar el contador de línea
+                    }
                     i = a;
                     if (sigchar.equals("*/")) {
                         i = a + 1;
                         finalizado = true;
-                        break;
+                        a=source.length();
                     }
                 }
                 if (!finalizado) {
