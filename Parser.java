@@ -1,8 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.mycompany.interprete;
+package interpretes;
 
 import java.util.List;
 
@@ -69,7 +65,7 @@ public class Parser {
         preanalisis = tokens.get(i);
         PROGRAM();
         if(hayErrores && !preanalisis.tipo.equals(TipoToken.EOF)){
-            System.out.println("Error en la posición " + preanalisis.posicion + ". No se esperaba el token " + preanalisis.tipo);
+            System.out.println("Error en la linea " + preanalisis.posicion + ". No se esperaba el token " + preanalisis.tipo);
         }
         else if(!hayErrores && preanalisis.tipo.equals(TipoToken.EOF)){
             System.out.println("Terminado con exito");
@@ -833,7 +829,7 @@ public class Parser {
         }
         else{
             hayErrores = true;
-            System.out.println("Error en la posición " + preanalisis.posicion + ". Se esperaba un  " + t.tipo);
+            System.out.println("Error en la linea " + (preanalisis.posicion-1) + ". Se esperaba un  " + t.tipo);
 
         }
     }
