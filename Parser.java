@@ -67,16 +67,21 @@ public class Parser {
     public void parse() {
         i=0;
         preanalisis = tokens.get(i);
-        DECLARATION();
-        if(!hayErrores && !preanalisis.equals(finCadena)){
+        PROGRAM();
+        if(hayErrores && !preanalisis.tipo.equals(TipoToken.EOF)){
             System.out.println("Error en la posición " + preanalisis.posicion + ". No se esperaba el token " + preanalisis.tipo);
         }
-        else if(!hayErrores && preanalisis.equals(finCadena)){
+        else if(!hayErrores && preanalisis.tipo.equals(TipoToken.EOF)){
             System.out.println("Terminado con exito");
         }
     }
-
+    private void PROGRAM(){
+        while(!preanalisis.tipo.equals(TipoToken.EOF)&&!hayErrores){
+            DECLARATION();
+        }
+    }
     private void DECLARATION() {
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.CLASE)) {
     caso = 0;           
@@ -102,36 +107,34 @@ public class Parser {
            preanalisis.tipo.equals(TipoToken.PARA) || 
            preanalisis.tipo.equals(TipoToken.COR_IZ)) {
     caso = 3;
-} else if (preanalisis.tipo.equals(TipoToken.EOF)) {
-    caso = 4;
-}else{
-    
+} else{
+    if(preanalisis.tipo.equals(TipoToken.COR_DER)){
+        hayErrores=true;
+    }
 }
         switch(caso){
             case 0:
                 CLASS_DECL();
-                DECLARATION();
+                //DECLARATION();
                 break;
             case 1:
                 FUN_DECL();
-                DECLARATION();
+                //DECLARATION();
                 break;
             case 2:
                 VAR_DECL();
-                DECLARATION();
+                //DECLARATION();
                 break;
             case 3:
                 STATEMENT();
-                DECLARATION();
-                break;
-            case 4:
-                coincidir(finCadena);
+                //DECLARATION();
                 break;
         }
         
     }
     
     private void CLASS_DECL(){
+        if(hayErrores) return;
         coincidir(clase);
         coincidir(identificador);
         CLASS_INHER();
@@ -140,6 +143,7 @@ public class Parser {
         coincidir(cor_der);
     }
     private void CLASS_INHER(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.MENOR)) {
             coincidir(menor);
             coincidir(identificador);
@@ -149,15 +153,19 @@ public class Parser {
         }
     }
     private void FUN_DECL(){
+        if(hayErrores) return;
         coincidir(fun);
         FUNCTION();
     }
     private void VAR_DECL(){
+        if(hayErrores) return;
         coincidir(var);
         coincidir(identificador);
         VAR_INIT();
+        coincidir(pun_y_com);
     }
     private void VAR_INIT(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.ASIGNACION)) {
             coincidir(asignacion);
         EXPRESSION();
@@ -168,6 +176,7 @@ public class Parser {
         
     }
     private void STATEMENT(){
+        if(hayErrores) return;
         int caso=-1;
         if(preanalisis.tipo.equals(TipoToken.EXCLA) || 
         preanalisis.tipo.equals(TipoToken.MENOS) || 
@@ -222,9 +231,12 @@ public class Parser {
         }
     }
     private void EXPR_STMT(){
+        if(hayErrores) return;
         EXPRESSION();
+        coincidir(pun_y_com);
     }
     private void FOR_STMT(){
+        if(hayErrores) return;
         coincidir(para);
         coincidir(pare_iz);
         FOR_STMT_1();
@@ -234,6 +246,7 @@ public class Parser {
         STATEMENT();
     }
     private void FOR_STMT_1(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.VAR)) {
     caso = 0;
@@ -264,6 +277,7 @@ public class Parser {
         }
     }
     private void FOR_STMT_2(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.IDENTIFICADOR) ||
         preanalisis.tipo.equals(TipoToken.NUMERO) ||
@@ -286,6 +300,7 @@ public class Parser {
         switch(caso){
             case 0:
                 EXPRESSION();
+                coincidir(pun_y_com);
                 break;
             case 1:
                 coincidir(pun_y_com);
@@ -293,6 +308,7 @@ public class Parser {
         }
     }
     private void FOR_STMT_3(){
+        if(hayErrores) return;
         if (preanalisis != null && (preanalisis.tipo.equals(TipoToken.NUMERO) || 
         preanalisis.tipo.equals(TipoToken.CADENA) || 
         preanalisis.tipo.equals(TipoToken.IDENTIFICADOR) ||  
@@ -310,6 +326,7 @@ public class Parser {
         
     }
     private void IF_STMT(){
+        if(hayErrores) return;
         coincidir(si);
         coincidir(pare_iz);
         EXPRESSION();
@@ -319,6 +336,7 @@ public class Parser {
 
     }
     private void ELSE_STATEMENT(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.ADEMAS)) {
             coincidir(ademas);
         STATEMENT();
@@ -329,16 +347,19 @@ public class Parser {
         
     }
     private void PRINT_STMT(){
+        if(hayErrores) return;
         coincidir(imprimir);
         EXPRESSION();
         coincidir(pun_y_com);
     }
     private void RETURN_STMT(){
+        if(hayErrores) return;
         coincidir(retornar);
         RETURN_EXP_OPC();
         coincidir(pun_y_com);
     }
     private void RETURN_EXP_OPC(){
+        if(hayErrores) return;
         if (preanalisis != null && (preanalisis.tipo.equals(TipoToken.NUMERO) || 
         preanalisis.tipo.equals(TipoToken.CADENA) || 
         preanalisis.tipo.equals(TipoToken.IDENTIFICADOR) ||  
@@ -355,6 +376,7 @@ public class Parser {
         }
     }
     private void WHILE_STMT(){
+        if(hayErrores) return;
         coincidir(mientras);
         coincidir(pare_iz);
         EXPRESSION();
@@ -362,11 +384,13 @@ public class Parser {
         STATEMENT();
     }
     private void BLOCK(){
+        if(hayErrores) return;
         coincidir(cor_iz);
         BLOCK_DECL();
         coincidir(cor_der);
     }
     private void BLOCK_DECL(){
+        if(hayErrores) return;
         if (preanalisis != null && (preanalisis.tipo.equals(TipoToken.CLASE) || 
         preanalisis.tipo.equals(TipoToken.FUN) || 
         preanalisis.tipo.equals(TipoToken.VAR) ||  
@@ -384,45 +408,30 @@ public class Parser {
         
     }
     private void EXPRESSION(){
+        if(hayErrores) return;
         ASSIGNMENT();
     }
     private void ASSIGNMENT(){
-        int caso=-1;
-        if (preanalisis.tipo.equals(TipoToken.NUMERO) || 
-        preanalisis.tipo.equals(TipoToken.CADENA) || 
-        preanalisis.tipo.equals(TipoToken.IDENTIFICADOR) ||  
-        preanalisis.tipo.equals(TipoToken.VERDADERO) || 
-        preanalisis.tipo.equals(TipoToken.FALSO) || 
-        preanalisis.tipo.equals(TipoToken.NULO) || 
-        preanalisis.tipo.equals(TipoToken.ESTE) ||
-        preanalisis.tipo.equals(TipoToken.PARE_IZ) ||
-        preanalisis.tipo.equals(TipoToken.SUPERS)){
-    caso = 0;
-} else if (preanalisis.tipo.equals(TipoToken.EXCLA) || 
-        preanalisis.tipo.equals(TipoToken.MENOS)){
-    caso = 1;
-}
-        else{
-    hayErrores=true;
-}
-
-        switch (caso) {
-            case 0:
-                CALL_OPC();
-                coincidir(identificador);
-                coincidir(asignacion);
-                ASSIGNMENT();
-                break;
-            case 1:
-                LOGIC_OR();
-                break;
+        if(hayErrores) return;
+        LOGIC_OR();
+        ASSIGNMENT_OPC();
+    }
+    private void ASSIGNMENT_OPC(){
+        if(hayErrores) return;
+        if (preanalisis != null && preanalisis.tipo.equals(TipoToken.ASIGNACION)) {
+            coincidir(asignacion);
+            EXPRESSION();
+        }else{
+        
         }
     }
     private void LOGIC_OR(){
+        if(hayErrores) return;
         LOGIC_AND();
         LOGIC_OR_2();
     }
     private void LOGIC_OR_2(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.O)) {
             coincidir(o);
         LOGIC_AND();
@@ -434,11 +443,13 @@ public class Parser {
         
     }
     private void LOGIC_AND(){
+        if(hayErrores) return;
         
         EQUALITY();
         LOGIC_AND_2();
     }
     private void LOGIC_AND_2(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.Y)) {
             coincidir(y);
             EQUALITY();
@@ -450,10 +461,12 @@ public class Parser {
         
     }
     private void EQUALITY(){
+        if(hayErrores) return;
         COMPARISON();
         EQUALITY_2();
     }
     private void EQUALITY_2(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.DIFERENTE)){
     caso = 0;
@@ -478,10 +491,12 @@ public class Parser {
         }
     }
     private void COMPARISON(){
+        if(hayErrores) return;
         TERM();
         COMPARISON_2();
     }
     private void COMPARISON_2(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.MAYOR)){
     caso = 0;
@@ -520,10 +535,12 @@ public class Parser {
         }
     }
     private void TERM(){
+        if(hayErrores) return;
         FACTOR();
         TERM_2();
     }
     private void TERM_2(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.MENOS)){
     caso = 0;
@@ -548,10 +565,12 @@ public class Parser {
         }
     }
     private void FACTOR(){
+        if(hayErrores) return;
         UNARY();
         FACTOR_2();
     }
     private void FACTOR_2(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.ENTRE)){
     caso = 0;
@@ -576,21 +595,22 @@ public class Parser {
         }
     }
     private void UNARY(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.EXCLA)){
     caso = 0;
 } else if (preanalisis.tipo.equals(TipoToken.MENOS)){
     caso = 1;
-} else if (preanalisis.tipo.equals(TipoToken.IDENTIFICADOR) || 
-           preanalisis.tipo.equals(TipoToken.NUMERO) || 
-           preanalisis.tipo.equals(TipoToken.CADENA) ||
-           preanalisis.tipo.equals(TipoToken.VERDADERO) ||
-           preanalisis.tipo.equals(TipoToken.FALSO) ||
+} else if (preanalisis.tipo.equals(TipoToken.VERDADERO) || 
+           preanalisis.tipo.equals(TipoToken.FALSO) || 
            preanalisis.tipo.equals(TipoToken.NULO) ||
            preanalisis.tipo.equals(TipoToken.ESTE) ||
+           preanalisis.tipo.equals(TipoToken.NUMERO) ||
+           preanalisis.tipo.equals(TipoToken.CADENA) ||
+           preanalisis.tipo.equals(TipoToken.IDENTIFICADOR) ||
            preanalisis.tipo.equals(TipoToken.PARE_IZ) ||
            preanalisis.tipo.equals(TipoToken.SUPERS)){
-    caso = 3;
+    caso = 2;
 }
         else{
     hayErrores=true;
@@ -611,10 +631,12 @@ public class Parser {
         }
     }
     private void CALL(){
+        if(hayErrores) return;
         PRIMARY();
         CALL_2();
     }
     private void CALL_2(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.PARE_IZ)){
     caso = 0;
@@ -640,6 +662,7 @@ public class Parser {
         }
     }
     private void CALL_OPC(){
+        if(hayErrores) return;
         if (preanalisis.tipo.equals(TipoToken.NUMERO) || 
         preanalisis.tipo.equals(TipoToken.CADENA) || 
         preanalisis.tipo.equals(TipoToken.IDENTIFICADOR) ||  
@@ -658,6 +681,7 @@ public class Parser {
         
     }
     private void PRIMARY(){
+        if(hayErrores) return;
         int caso=-1;
         if (preanalisis.tipo.equals(TipoToken.VERDADERO)){
     caso = 0;
@@ -717,6 +741,7 @@ public class Parser {
         }
     }
     private void FUNCTION(){
+        if(hayErrores) return;
         coincidir(identificador);
         coincidir(pare_iz);
         PARAMETERS_OPC();
@@ -724,8 +749,10 @@ public class Parser {
         BLOCK();
     }
     private void FUNCTIONS(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.IDENTIFICADOR)) {
-        
+        FUNCTION();
+        FUNCTIONS();
     } else {
         // Producción de cadena vacía (Ɛ)
         // No haces nada en este caso, simplemente sales de la función
@@ -733,6 +760,7 @@ public class Parser {
         
     }
     private void PARAMETERS_OPC(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.IDENTIFICADOR)) {
         PARAMETERS();
     } else {
@@ -742,10 +770,12 @@ public class Parser {
         
     }
     private void PARAMETERS(){
+        if(hayErrores) return;
         coincidir(identificador);
         PARAMETERS_2();
     }
     private void PARAMETERS_2(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.COMA)) {
         coincidir(coma);
         coincidir(identificador);
@@ -757,6 +787,7 @@ public class Parser {
         
     }
     private void ARGUMENTS_OPC(){
+        if(hayErrores) return;
         if (preanalisis != null && (preanalisis.tipo.equals(TipoToken.EXCLA) || 
            preanalisis.tipo.equals(TipoToken.MENOS) || 
            preanalisis.tipo.equals(TipoToken.NUMERO) || 
@@ -769,18 +800,19 @@ public class Parser {
            preanalisis.tipo.equals(TipoToken.ESTE) ||
            preanalisis.tipo.equals(TipoToken.PARE_IZ) ||
            preanalisis.tipo.equals(TipoToken.SUPERS))) {
-        
+        ARGUMENTS();
     } else {
         // Producción de cadena vacía (Ɛ)
         // No haces nada en este caso, simplemente sales de la función
-    }
-        ARGUMENTS();
+    }     
     }
     private void ARGUMENTS(){
+        if(hayErrores) return;
         EXPRESSION();
         ARGUMENTS_2();
     }
     private void ARGUMENTS_2(){
+        if(hayErrores) return;
         if (preanalisis != null && preanalisis.tipo.equals(TipoToken.COMA)) {
         coincidir(coma);
         EXPRESSION();
