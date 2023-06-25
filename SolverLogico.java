@@ -33,16 +33,12 @@ public class SolverLogico {
         Object resultadoIzquierdo = resolver(izq);
         Object resultadoDerecho = resolver(der);
 
-        if(resultadoIzquierdo instanceof Double && resultadoDerecho instanceof Double){
+        if(resultadoIzquierdo instanceof Boolean && resultadoDerecho instanceof Boolean){
             switch (n.getValue().tipo){
-                case MAS:
-                    return ((Double)resultadoIzquierdo + (Double) resultadoDerecho);
-                case MENOS:
-                    return ((Double)resultadoIzquierdo - (Double) resultadoDerecho);
-                case POR:
-                    return ((Double)resultadoIzquierdo * (Double) resultadoDerecho);
-                case ENTRE:
-                    return ((Double)resultadoIzquierdo / (Double) resultadoDerecho);
+                case O:
+                    return ((Boolean)resultadoIzquierdo || (Boolean) resultadoDerecho);
+                case Y:
+                    return ((Boolean)resultadoIzquierdo && (Boolean) resultadoDerecho);
             }
         }
         else if(resultadoIzquierdo instanceof String && resultadoDerecho instanceof String){
