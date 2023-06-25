@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package interpretes;
+package compiladores.Interpretes;
 
 public class SolverLogico {
 
@@ -43,7 +43,8 @@ public class SolverLogico {
         }
         else if(resultadoIzquierdo instanceof String && resultadoDerecho instanceof String){
             if (n.getValue().tipo == TipoToken.MAS){
-                // Ejecutar la concatenación
+               String concatenacion = (String) resultadoIzquierdo + (String) resultadoDerecho;
+               return concatenacion;
             }
         }
         else{

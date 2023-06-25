@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package interpretes;
+package compiladores.Interpretes;
 
 
 import java.util.ArrayList;
@@ -60,6 +60,10 @@ public class GeneradorPostfija {
                 if(estructuraDeControl){
                     postfija.add(new Token(TipoToken.PUN_Y_COM, ";"));
                 }
+            } else if(t.tipo == TipoToken.MIENTRAS){
+                pila.push(t);
+                estructuraDeControl=true;
+                pilaEstructurasDeControl.push(t);
             }
             else if(t.esOperador()){
                 while(!pila.isEmpty() && pila.peek().precedenciaMayorIgual(t)){
@@ -80,6 +84,10 @@ public class GeneradorPostfija {
                 // pudiera omitirse, sólo hay que tener cuidado en el manejo
                 // del "}".
                 pila.push(t);
+            }else if(t.tipo == TipoToken.SI){
+                pila.push(t);
+                estructuraDeControl = true;
+                pilaEstructurasDeControl.push(t);
             }
             else if(t.tipo == TipoToken.COR_DER && estructuraDeControl){
 

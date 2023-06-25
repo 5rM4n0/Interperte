@@ -1,4 +1,4 @@
-package interpretes;
+package compiladores.Interpretes;
 
 
 public class Token {
@@ -57,6 +57,7 @@ public class Token {
             case SI:
             case IMPRIMIR:
             case ADEMAS:
+            case MIENTRAS:
                 return true;
             default:
                 return false;
@@ -67,6 +68,7 @@ public class Token {
         switch (this.tipo){
             case SI:
             case ADEMAS:
+            case MIENTRAS:
                 return true;
             default:
                 return false;
