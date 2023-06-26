@@ -1,4 +1,4 @@
-package compiladores.Interpretes;
+package interpretes;
 
 
 public class Token {
@@ -30,6 +30,7 @@ public class Token {
         switch (this.tipo){
             case IDENTIFICADOR:
             case NUMERO:
+            case CADENA:
                 return true;
             default:
                 return false;
@@ -45,6 +46,12 @@ public class Token {
             case ASIGNACION:
             case MAYOR:
             case MAYOR_O_IGUAL:
+            case MENOR:
+            case MENOR_O_IGUAL:
+            case Y:
+            case O:
+            case IGUAL:
+            case DIFERENTE:
                 return true;
             default:
                 return false;
@@ -58,6 +65,7 @@ public class Token {
             case IMPRIMIR:
             case ADEMAS:
             case MIENTRAS:
+            case PARA:
                 return true;
             default:
                 return false;
@@ -68,6 +76,7 @@ public class Token {
         switch (this.tipo){
             case SI:
             case ADEMAS:
+            case PARA:
             case MIENTRAS:
                 return true;
             default:
@@ -83,14 +92,23 @@ public class Token {
         switch (this.tipo){
             case POR:
             case ENTRE:
-                return 3;
+                return 7;
             case MAS:
             case MENOS:
-                return 2;
-            case ASIGNACION:
-                return 1;
+                return 6;           
             case MAYOR:
             case MAYOR_O_IGUAL:
+            case MENOR:
+            case MENOR_O_IGUAL:
+                return 5;
+            case IGUAL:
+            case DIFERENTE:
+                return 4;
+            case Y:            
+                return 3;
+            case O:
+                return 2;
+            case ASIGNACION:
                 return 1;
         }
 
@@ -106,6 +124,10 @@ public class Token {
             case ASIGNACION:
             case MAYOR:
             case MAYOR_O_IGUAL:
+            case MENOR_O_IGUAL:
+            case MENOR:
+            case IGUAL:
+            case DIFERENTE:
                 return 2;
         }
         return 0;
